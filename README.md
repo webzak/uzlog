@@ -23,7 +23,15 @@ uzlog [options]
 **-w dir** write sessions to files
 
 
-Typical usage: **./uzlog -fco -p 7777**
+Typical usage: **./uzlog -fco -p 7000**
+
+
+### Using with docker
+
+
+docker build -t uzlog .
+
+docker run -it --rm -p 7000:7000/udp uzlog
 
 
 ## Protocol
