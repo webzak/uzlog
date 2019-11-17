@@ -9,6 +9,8 @@
 #include <errno.h>
 #include "inc/mrec.h"
 #include "inc/mlog.h"
+#include "inc/utils.h"
+
 
 #define HEADER_SIZE 4
 #define SESSION_FG 16
@@ -158,28 +160,6 @@ void send_out(mrec_message* m, int session_changed) {
 }
 
 
-int ensure_date_dir(const char* path) {
-
-    struct stat s;
-
-    int res = stat(path, &s);
-    if(res == 0 && S_ISDIR(s.st_mode)) {
-        if(access(path, W_OK) != 0) {
-            fprintf(stderr, "Directory is not writable: %s", path);
-            return 0;
-        }
-        return 1;
-    }
-    if (errno == ENOENT) {
-        mkdir(path, 0755);
-    } else {
-        perror(path);
-        return 0;
-    }
-    return 1;
-}
-
-
 struct logfile* attach_logfile(uint64_t session) {
 
     int msecs;
@@ -191,7 +171,7 @@ struct logfile* attach_logfile(uint64_t session) {
     }
     path[pathlen] = '\0'; // restore base path
     sprintf(&path[pathlen], "%d%02d%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
-    if (! ensure_date_dir(path)) {
+    if (! ensure_dir(path)) {
         return NULL;
     }
     sprintf(&path[pathlen+8], "/%02d%02d%02d.%d.log", tm->tm_hour, tm->tm_min, tm->tm_sec, msecs);

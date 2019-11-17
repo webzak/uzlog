@@ -8,8 +8,8 @@
 #include <errno.h>
 #include "inc/mrec.h"
 #include "inc/mlog.h"
+#include "inc/filesave.h"
 
-#define UZP_MSG_TYPE_LOG 1
 #define MAX_PORT 65536
 
 
@@ -23,12 +23,13 @@ void echo_usage_info(char* arg);
 char* ip = NULL;
 char* port = NULL;
 char* wpath = NULL;
+char* fpath = NULL;
 
 int main (int argc, char *argv[]) {
 
     int opt, mlog_options = 0;
 
-    while ((opt = getopt(argc, argv, "hp:a:w:ocf")) != -1) {
+    while ((opt = getopt(argc, argv, "hp:a:w:s:ocf")) != -1) {
         switch (opt) {
         case 'p':
             if(!get_port(optarg, &port)) {
@@ -44,6 +45,12 @@ int main (int argc, char *argv[]) {
             break;
         case 'w':
             if (!get_path(optarg, &wpath)) {
+                fprintf(stderr, "Path is not writable: %s\n", optarg);
+                exit(1);
+            }
+            break;
+        case 's':
+            if (!get_path(optarg, &fpath)) {
                 fprintf(stderr, "Path is not writable: %s\n", optarg);
                 exit(1);
             }
@@ -77,10 +84,14 @@ int main (int argc, char *argv[]) {
     }
 
     mlog_init(mlog_options, wpath);
+    filesave_init(fpath);
 
     printf("Listening on %s:%s", (ip == NULL) ? "0.0.0.0" : ip, port);
     if (wpath != NULL) {
-        printf (", writing to %s ", wpath);
+        printf (", writing logs to %s ", wpath);
+    }
+    if (fpath != NULL) {
+        printf (", saving files to %s ", fpath);
     }
     printf(" ...\n");
 
@@ -90,6 +101,8 @@ int main (int argc, char *argv[]) {
             unsigned char mtype = ((unsigned char*)m->body)[0];
             if (mtype == UZP_MSG_TYPE_LOG) {
                 mlog_handle(m);
+            } else if (mtype == UZP_MSG_TYPE_FILESAVE) {
+                filesave_handle(m);
             }
             free(m->body);
             free(m);
@@ -106,6 +119,7 @@ void signal_handler(int signum)
      free(ip);
      free(port);
      free(wpath);
+     free(fpath);
      printf("\nGood bye!\n");
      exit(0);
 }
@@ -158,5 +172,5 @@ int get_path(const char* arg, char **path) {
 }
 
 void echo_usage_info(char* arg) {
-    printf("Usage: %s -p port [-a addr] [-o] [-c] [-f] [-w path]\n", arg);
+    printf("Usage: %s -p port [-a addr] [-o] [-c] [-f] [-w path] [-s path]\n", arg);
 }

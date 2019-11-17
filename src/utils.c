@@ -8,6 +8,31 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/stat.h>
+#include <errno.h>
+
+
+// check dir exists and is writable, if does not exist - create new one
+int ensure_dir(const char* dirpath) {
+
+    struct stat s;
+
+    int res = stat(dirpath, &s);
+    if(res == 0 && S_ISDIR(s.st_mode)) {
+        if(access(dirpath, W_OK) != 0) {
+            fprintf(stderr, "Directory is not writable: %s", dirpath);
+            return 0;
+        }
+        return 1;
+    }
+    if (errno == ENOENT) {
+        mkdir(dirpath, 0755);
+    } else {
+        perror(dirpath);
+        return 0;
+    }
+    return 1;
+}
 
 void utils_show_ai(struct addrinfo* ai){
 

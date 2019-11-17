@@ -20,7 +20,10 @@ uzlog [options]
 
 **-f** allow formatted output
 
-**-w dir** write sessions to files
+**-w path** path to save log sessions to files. The option must be set to enable log saving.
+
+**-s path** path to save data sent for saving (with msg type = 2). The option must be set to enable data saving.
+
 
 
 Typical usage: **./uzlog -fco -p 7000**
@@ -65,3 +68,9 @@ First byte determines the message type and formatting for the rest of the messag
 #### Log message format
 
 | message type = 1 (1b) | fg color (1b) | bg color (1b) |  0 (1b) | payload |
+
+2 - SAVE
+
+#### Save message format
+
+| message type = 2 (1b) | append (1b) | filename (variable size) |  0 (1b) | payload |

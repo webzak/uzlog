@@ -2,6 +2,8 @@
 #define _MLOG_H_
 #include "mrec.h"
 
+#define UZP_MSG_TYPE_LOG 1
+
 #define UZP_MLOG_COLOR_OPT 1
 #define UZP_MLOG_FORMAT_OPT 2
 #define UZP_MLOG_STDOUT 4
